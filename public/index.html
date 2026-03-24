@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Collectibles Inventory Tracker</title>
+    <style>
+          * {
+                  margin: 0;
+                  padding: 0;
+                  box-sizing: border-box;
+          }
+
+          html, body {
+                  height: 100%;
+                  background-color: #f5f5f5;
+          }
+
+          body {
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                  color: #333;
+          }
+
+          .container {
+                  padding: 1.5rem;
+                  max-width: 1200px;
+                  margin: 0 auto;
+                  background: white;
+                  min-height: 100vh;
+          }
+
+          .header {
+                  margin-bottom: 2rem;
+                  border-bottom: 2px solid #007bff;
+                  padding-bottom: 1rem;
+          }
+
+          .header h1 {
+                  font-size: 28px;
+                  font-weight: 600;
+                  margin-bottom: 0.25rem;
+                  color: #007bff;
+          }
+
+          .header p {
+                  font-size: 14px;
+                  color: #666;
+          }
+
+          .tabs {
+                  display: flex;
+                  gap: 0.5rem;
+                  margin-bottom: 1.5rem;
+                  border-bottom: 1px solid #ddd;
+                  flex-wrap: wrap;
+          }
+
+          .tab-btn {
+                  background: none;
+                  border: none;
+                  padding: 0.75rem 1.5rem;
+                  cursor: pointer;
+                  color: #666;
+                  border-bottom: 3px solid transparent;
+                  font-size: 14px;
+                  font-weight: 500;
+                  transition: all 0.2s;
+          }
+
+          .tab-btn:hover {
+                  color: #007bff;
+          }
+
+          .tab-btn.active {
+                  color: #007bff;
+                  border-bottom-color: #007bff;
+          }
+
+          .tab-content {
+                  display: none;
+          }
+
+          .tab-content.active {
+                  display: block;
+          }
+
+          .metrics {
+                  display: grid;
+                  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                  gap: 1rem;
+                  margin-bottom: 2rem;
+          }
+
+          .metric {
+                  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+                  padding: 1.5rem;
+                  border-radius: 8px;
+                  border: 1px solid #e9ecef;
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+          }
+
+          .metric-label {
+                  font-size: 12px;
+                  color: #999;
+                  margin-bottom: 0.75rem;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  font-weight: 600;
+          }
+
+          .metric-value {
+                  font-size: 32px;
+                  font-weight: 700;
+                  color: #007bff;
+          }
+
+          .section-title {
+                  font-size: 18px;
+                  font-weight: 600;
+                  margin: 2rem 0 1rem 0;
+                  color: #333;
+          }
+
+          .form-group {
+                  margin-bottom: 1rem;
+          }
+
+          .form-group label {
+                  display: block;
+                  font-size: 13px;
+                  font-weight: 600;
+                  margin-bottom: 0.5rem;
+                  color: #333;
+          }
+
+          .form-group input,
+          .form-group select {
+                  width: 100%;
+                  padding: 0.75rem;
+                  border: 1px solid #ddd;
+                  border-radius: 4px;
+                  font-size: 14px;
+                  background: white;
+                  color: #333;
+                  transition: border-color 0.2s;
+          }
+
+          .form-group input:focus,
+          .form-group select:focus {
+                  outline: none;
+                  border-color: #007bff;
+                  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+          }
+
+          .form-row {
+                  display: grid;
+                  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                  gap: 1rem;
+                  margin-bottom: 1rem;
+          }
+
+          .btn {
+                  padding: 0.75rem 1.5rem;
+                  border: 1px solid #ddd;
+                  background: white;
+                  color: #333;
+                  border-radius: 4px;
+                  cursor: pointer;
+                  font-size: 14px;
+                  font-weight: 600;
+                  transition: all 0.2s;
+          }
+
+          .btn:hover {
+                  background: #f8f9fa;
+                  border-color: #bbb;
+          }
+
+          .btn:disabled {
+                  opacity: 0.6;
+                  cursor: not-allowed;
+          }
+
+          .btn-primary {
+                  background: #007bff;
+                  color: white;
+                  border-color: #0056b3;
+          }
+
+          .btn-primary:hover {
+                  background: #0056b3;
+                  border-color: #003d82;
+          }
+
+          .btn-secondary {
+                  background: #6c757d;
+                  color: white;
+                  border-color: #5a6268;
+          }
+
+          .btn-secondary:hover {
+                  background: #5a6268;
+                  border-color: #4e555b;
+          }
+
+          .btn-danger {
+                  color: #dc3545;
+          }
+
+          .btn-danger:hover {
+                  background: #f8d7da;
+                  border-color: #dc3545;
+          }
+
+          table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  font-size: 14px;
+                  margin-top: 1rem;
+                  background: white;
+                  border: 1px solid #ddd;
+                  border-radius: 4px;
+                  overflow: hidden;
+          }
+
+          th {
+                  text-align: left;
+                  padding: 1rem;
+                  border-bottom: 2px solid #007bff;
+                  font-weight: 600;
+                  color: #007bff;
+                  background: #f8f9fa;
+          }
+
+          td {
+                  padding: 1rem;
+                  border-bottom: 1px solid #ddd;
+          }
+
+          tr:hover {
+                  background: #f8f9fa;
+          }
+
+          tr:last-child td {
+                  border-bottom: none;
+          }
+
+          .empty-state {
+                  text-align: center;
+                  color: #999;
+                  padding: 2rem 1rem;
+          }
+
+          .empty-state-icon {
+                  font-size: 48px;
+                  margin-bottom: 1rem;
+                  opacity: 0.5;
+          }
+
+          .success-message {
+                  background: #d4edda;
+                  border: 1px solid #c3e6cb;
+                  color: #155724;
+                  padding: 1rem;
+                  border-radius: 4px;
+                  margin-bottom: 1rem;
+                  display: none;
+          }
+
+          .success-message.show {
+                  display: block;
+          }
+
+          .error-message {
+                  background: #f8d7da;
+                  border: 1px solid #f5c6cb;
+                  color: #721c24;
+                  padding: 1rem;
+                  border-radius: 4px;
+                  margin-bottom: 1rem;
+                  display: none;
+          }
+
+          .error-message.show {
+                  display: block;
+          }
+
+          .info-message {
+                  background: #d1ecf1;
+                  border: 1px solid #bee5eb;
+                  color: #0c5460;
+                  padding: 1rem;
+                  border-radius: 4px;
+                  margin-bottom: 1rem;
+                  display: none;
+          }
+
+          .info-message.show {
+                  display: block;
+          }
+
+          .tcgplayer-search {
+                  background: #f8f9fa;
+                  padding: 1.5rem;
+                  border-radius: 4px;
+                  margin: 1rem 0 2rem 0;
+                  border: 1px solid #ddd;
+          }
+
+          .search-results {
+                  margin-top: 1rem;
+          }
+
+          .search-result-item {
+                  background: white;
+                  border: 1px solid #ddd;
+                  padding: 1rem;
+                  margin-bottom: 0.5rem;
+                  border-radius: 4px;
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+          }
+
+          .search-result-info {
+                  flex: 1;
+          }
+
+          .search-result-name {
+                  font-weight: 600;
+                  margin-bottom: 0.25rem;
+          }
+
+          .search-result-price {
+                  font-size: 13px;
+                  color: #666;
+          }
+
+          .loading {
+                  display: inline-block;
+                  width: 16px;
+                  height: 16px;
+                  border: 2px solid #f3f3f3;
+                  border-top: 2px solid #007bff;
+                  border-radius: 50%;
+                  animation: spin 1s linear infinite;
+          }
+
+          @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+          }
+
+          .export-section {
+                  margin-top: 2rem;
+                  padding: 1rem;
+                  background: #f8f9fa;
+                  border-radius: 4px;
+                  border: 1px solid #ddd;
+          }
+
+          @media (max-width: 768px) {
+                  .container {
+                            padding: 1rem;
+                  }
+
+                  .header h1 {
+                            font-size: 22px;
+                  }
+
+                  .metrics {
+                            grid-template-columns: 1fr;
+                  }
+
+                  .form-row {
+                            grid-template-columns: 1fr;
+                  }
+
+                  table {
+                            font-size: 13px;
+                  }
+
+                  th, td {
+                            padding: 0.75rem 0.5rem;
+                  }
+
+                  .btn {
+                            padding: 0.6rem 1rem;
+                            font-size: 13px;
+                  }
+
+                  .search-result-item {
+                            flex-direction: column;
+                            align-items: flex-start;
+                  }
+          }
+        </style>
+  </head>
+  <body>
+
+    <div class="container">
+        <div class="header">
+              <h1>📦 Collectibles Inventory Tracker</h1>
+            <p>Track your card inventory with live TCGPlayer pricing</p>
+        </div>div>
+    
+      <div class="success-message" id="successMessage"></div>div>
+      <div class="error-message" id="errorMessage"></div>div>
+      <div class="info-message" id="infoMessage"></div>div>
+    
+      <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>button>
+          <button class="tab-btn" onclick="switchTab('products')">Products</button>button>
+          <button class="tab-btn" onclick="switchTab('sales')">Record sale</button>button>
+      </div>div>
+    
+      <!-- Dashboard Tab -->
+      <div id="dashboard" class="tab-content active">
+          <div class="metrics">
+                <div class="metric">
+                        <div class="metric-label">Total inventory</div>div>
+                        <div class="metric-value" id="totalInventory">0</div>div>
+                </div>div>
+                <div class="metric">
+                        <div class="metric-label">Total revenue</div>div>
+                        <div class="metric-value" id="totalRevenue">$0</div>div>
+                </div>div>
+                <div class="metric">
+                        <div class="metric-label">Items sold</div>div>
+                        <div class="metric-value" id="totalSold">0</div>div>
+                </div>div>
+                <div class="metric">
+                        <div class="metric-label">Avg sale value</div>div>
+                        <div class="metric-value" id="avgSale">$0</div>div>
+                </div>div>
+          </div>div>
+      
+          <div class="section-title">Inventory by category</div>div>
+          <table>
+                  <thead>
+                            <tr>
+                                        <th>Category</th>
+                            <th>In stock</th>
+                            <th>Sold</th>
+                            <th>Revenue</th>
+                            </tr>
+                  </thead>
+                <tbody id="categoryStats">
+                  <tr>
+                              <td colspan="4" class="empty-state">No products yet. Add some to get started!</td>td>
+                  </tr>
+                </tbody>tbody>
+          </table>
+
+            <div class="section-title">Recent sales</div>div>
+            <table>
+                    <thead>
+                              <tr>
+                                          <th>Product</th>
+                              <th>Category</th>
+                              <th>Quantity</th>
+                              <th>Price each</th>
+                              <th>Total</th>
+                              <th>Date</th>
+                              </tr>
+                    </thead>
+                  <tbody id="recentSales">
+                    <tr>
+                                <td colspan="6" class="empty-state">No sales yet</td>td>
+                    </tr>
+                  </tbody>tbody>
+            </table>
+
+            <div class="export-section">
+                    <h3 style="margin-bottom: 1rem;">Data management</h3>
+                    <button class="btn btn-primary" onclick="exportToCSV()">📥 Export to CSV</button>button>
+                    <button class="btn" onclick="clearAllData()" style="margin-left: 0.5rem;">🗑️ Clear all data</button>button>
+                    <p style="font-size: 12px; color: #666; margin-top: 0.5rem;">Export your sales and inventory data for backup or analysis</p>
+            </div>div>
+      </div>div>
+
+        <!-- Products Tab -->
+        <div id="products" class="tab-content">
+              <div class="section-title">Add new product</div>div>
+
+              <div class="tcgplayer-search">
+                      <h3 style="font-size: 16px; margin-bottom: 1rem;">🔍 Search TCGPlayer pricing</h3>
+                      <div class="form-row">
+                                <div class="form-group">
+                                            <label>Product name</label>
+                                          <input type="text" id="searchProductName" placeholder="e.g., Pokémon Booster Box">
+                                </div>div>
+                              <div class="form-group">
+                                        <label>Category</label>
+                                        <select id="searchCategory">
+                                                    <option>Sealed card products</option>
+                                                    <option>Single cards</option>
+                                                    <option>Pins</option>
+                                                    <option>Stickers</option>
+                                                    <option>Playmats</option>
+                                                    <option>Clothing</option>
+                                        </select>select>
+                              </div>div>
+                      </div>div>
+                    <button class="btn btn-secondary" onclick="searchTCGPlayer()">Search TCGPlayer</button>button>
+                    <div id="searchResults" class="search-results"></div>div>
+              </div>div>
+        
+            <h3 style="font-size: 16px; margin: 2rem 0 1rem 0;">Or add manually</h3>
+            <div class="form-row">
+                  <div class="form-group">
+                          <label>Product name</label>
+                          <input type="text" id="productName" placeholder="e.g., Pokémon Booster Box">
+                  </div>div>
+                  <div class="form-group">
+                          <label>Category</label>
+                          <select id="productCategory">
+                                    <option>Sealed card products</option>
+                                    <option>Single cards</option>
+                                    <option>Pins</option>
+                                    <option>Stickers</option>
+                                    <option>Playmats</option>
+                                    <option>Clothing</option>
+                          </select>select>
+                  </div>div>
+                  <div class="form-group">
+                          <label>Initial quantity</label>
+                          <input type="number" id="productQuantity" placeholder="0" min="0">
+                  </div>div>
+            </div>div>
+            <div class="form-row">
+                  <div class="form-group">
+                          <label>Unit price ($)</label>
+                          <input type="number" id="productPrice" placeholder="0.00" min="0" step="0.01">
+                  </div>div>
+            </div>div>
+            <button class="btn btn-primary" onclick="addProduct()">➕ Add product</button>button>
+        
+            <div class="section-title">Your products</div>div>
+            <table>
+                  <thead>
+                          <tr>
+                                      <th>Product</th>
+                            <th>Category</th>
+                            <th>In stock</th>
+                            <th>Unit price</th>
+                            <th>Action</th>
+                          </tr>
+                  </thead>
+                  <tbody id="productsList">
+                    <tr>
+                                <td colspan="5" class="empty-state">No products added yet</td>td>
+                    </tr>
+                  </tbody>tbody>
+            </table>
+        </div>div>
+
+        <!-- Sales Tab -->
+        <div id="sales" class="tab-content">
+              <div class="section-title">Record a sale</div>div>
+              <div class="form-row">
+                      <div class="form-group">
+                                <label>Product</label>
+                                <select id="saleProduct">
+                                            <option value="">-- Select a product --</option>
+                                </select>select>
+                      </div>div>
+                      <div class="form-group">
+                                <label>Quantity sold</label>
+                                <input type="number" id="saleQuantity" placeholder="1" min="1" value="1">
+                      </div>div>
+                      <div class="form-group">
+                                <label>Price per unit ($)</label>
+                                <input type="number" id="salePrice" placeholder="0.00" min="0" step="0.01">
+                      </div>div>
+              </div>div>
+              <button class="btn btn-primary" onclick="recordSale()">💾 Record sale</button>button>
+        </div>div>
+    </div>div>
+
+    <script>
+        const API_BASE_URL = window.location.origin;
+
+        let products = JSON.parse(localStorage.getItem('inventoryProducts')) || [];
+        let sales = JSON.parse(localStorage.getItem('inventorySales')) || [];
+
+        function showMessage(type, message) {
+              const messageEl = document.getElementById(`${type}Message`);
+              messageEl.textContent = message;
+              messageEl.classList.add('show');
+              setTimeout(() => messageEl.classList.remove('show'), 4000);
+        }
+
+        function switchTab(tabName) {
+              document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+              document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+              document.getElementById(tabName).classList.add('active');
+              event.target.classList.add('active');
+
+              if (tabName === 'dashboard') updateDashboard();
+        }
+
+        async function searchTCGPlayer() {
+              const productName = document.getElementById('searchProductName').value.trim();
+              const category = document.getElementById('searchCategory').value;
+              const resultsDiv = document.getElementById('searchResults');
+
+              if (!productName) {
+                      showMessage('error', 'Please enter a product name');
+                      return;
+              }
+
+              resultsDiv.innerHTML = '<p style="text-align: center;"><span class="loading"></span> Searching TCGPlayer...</p>';
+
+              try {
+                      const response = await fetch(`${API_BASE_URL}/api/search-tcgplayer`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ productName, category })
+                      });
+
+                      const data = await response.json();
+
+                      if (data.success && data.results.length > 0) {
+                                resultsDiv.innerHTML = data.results.map(result => `
+                                          <div class="search-result-item">
+                                                      <div class="search-result-info">
+                                                                    <div class="search-result-name">${escapeHtml(result.name)}</div>
+                                                                                  <div class="search-result-price">TCGPlayer ID: ${result.id}</div>
+                                                                                              </div>
+                                                                                                          <button class="btn btn-primary" onclick="selectTCGPlayerProduct('${result.id}', '${escapeHtml(result.name)}')">
+                                                                                                                        Select
+                                                                                                                                    </button>
+                                                                                                                                              </div>
+                                                                                                                                                      `).join('');
+                      } else {
+                                resultsDiv.innerHTML = '<p style="text-align: center; color: #999;">No products found on TCGPlayer</p>';
+                      }
+              } catch (error) {
+                      console.error('Search error:', error);
+                      showMessage('error', 'Failed to search TCGPlayer. Make sure the server is running.');
+                      resultsDiv.innerHTML = '';
+              }
+        }
+
+        async function selectTCGPlayerProduct(productId, productName) {
+              document.getElementById('productName').value = productName;
+              document.getElementById('searchProductName').value = '';
+              document.getElementById('searchResults').innerHTML = '';
+
+              showMessage('info', `Selected: ${productName}. Now fetching live price...`);
+
+              try {
+                      const response = await fetch(`${API_BASE_URL}/api/tcgplayer-price/${productId}`);
+                      const data = await response.json();
+
+                      if (data.success) {
+                                document.getElementById('productPrice').value = data.price.toFixed(2);
+                                showMessage('success', `Price loaded: $${data.price.toFixed(2)}`);
+                      } else {
+                                showMessage('info', 'Could not fetch price. You can enter it manually.');
+                      }
+              } catch (error) {
+                      console.error('Price fetch error:', error);
+                      showMessage('info', 'Server unavailable. You can enter the price manually.');
+              }
+        }
+
+        function addProduct() {
+              const name = document.getElementById('productName').value.trim();
+              const category = document.getElementById('productCategory').value;
+              const quantity = parseInt(document.getElementById('productQuantity').value) || 0;
+              const price = parseFloat(document.getElementById('productPrice').value) || 0;
+
+              if (!name) {
+                      showMessage('error', 'Please enter a product name');
+                      return;
+              }
+
+              if (price <= 0) {
+                      showMessage('error', 'Please enter a valid price');
+                      return;
+              }
+
+              const product = {
+                      id: Date.now(),
+                      name,
+                      category,
+                      quantity,
+                      price,
+                      createdAt: new Date().toLocaleDateString()
+              };
+
+              products.push(product);
+              localStorage.setItem('inventoryProducts', JSON.stringify(products));
+
+              document.getElementById('productName').value = '';
+              document.getElementById('productQuantity').value = '';
+              document.getElementById('productPrice').value = '';
+
+              showMessage('success', '✓ Product added successfully');
+              updateProductsList();
+              updateSaleProductSelect();
+        }
+
+        function deleteProduct(id) {
+              if (confirm('Are you sure? This will delete the product but keep sales history.')) {
+                      products = products.filter(p => p.id !== id);
+                      localStorage.setItem('inventoryProducts', JSON.stringify(products));
+                      updateProductsList();
+                      updateSaleProductSelect();
+                      showMessage('success', '✓ Product deleted');
+              }
+        }
+
+        function recordSale() {
+              const productId = parseInt(document.getElementById('saleProduct').value);
+              const quantity = parseInt(document.getElementById('saleQuantity').value) || 0;
+              const price = parseFloat(document.getElementById('salePrice').value) || 0;
+
+              if (!productId || quantity <= 0 || price < 0) {
+                      showMessage('error', 'Please fill in all fields correctly');
+                      return;
+              }
+
+              const product = products.find(p => p.id === productId);
+              if (!product) {
+                      showMessage('error', 'Product not found');
+                      return;
+              }
+
+              if (product.quantity < quantity) {
+                      showMessage('error', `Only ${product.quantity} items in stock`);
+                      return;
+              }
+
+              product.quantity -= quantity;
+              const sale = {
+                      id: Date.now(),
+                      productId,
+                      productName: product.name,
+                      category: product.category,
+                      quantity,
+                      price,
+                      total: quantity * price,
+                      date: new Date().toLocaleDateString()
+              };
+
+              sales.push(sale);
+              localStorage.setItem('inventoryProducts', JSON.stringify(products));
+              localStorage.setItem('inventorySales', JSON.stringify(sales));
+
+              document.getElementById('saleQuantity').value = '1';
+              document.getElementById('salePrice').value = '';
+              document.getElementById('saleProduct').value = '';
+
+              showMessage('success', '✓ Sale recorded successfully');
+              updateProductsList();
+              updateSaleProductSelect();
+              updateDashboard();
+        }
+
+        function updateProductsList() {
+              const tbody = document.getElementById('productsList');
+              if (products.length === 0) {
+                      tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No products added yet</td></tr>';
+                      return;
+              }
+
+              tbody.innerHTML = products.map(p => `
+                    <tr>
+                            <td><strong>${escapeHtml(p.name)}</strong></td>
+                                    <td>${escapeHtml(p.category)}</td>
+                                            <td>${p.quantity}</td>
+                                                    <td>$${p.price.toFixed(2)}</td>
+                                                            <td><button class="btn btn-danger" onclick="deleteProduct(${p.id})">Delete</button></td>
+                                                                  </tr>
+                                                                      `).join('');
+        }
+
+        function updateSaleProductSelect() {
+              const select = document.getElementById('saleProduct');
+              select.innerHTML = '<option value="">-- Select a product --</option>';
+              select.innerHTML += products.map(p => `<option value="${p.id}">${escapeHtml(p.name)} (${p.quantity} in stock)</option>`).join('');
+
+              select.addEventListener('change', function() {
+                      const product = products.find(p => p.id === parseInt(this.value));
+                      if (product) {
+                                document.getElementById('salePrice').value = product.price.toFixed(2);
+                      }
+              });
+        }
+
+        function updateDashboard() {
+              const totalInventory = products.reduce((sum, p) => sum + p.quantity, 0);
+              const totalRevenue = sales.reduce((sum, s) => sum + s.total, 0);
+              const totalSold = sales.reduce((sum, s) => sum + s.quantity, 0);
+              const avgSale = sales.length > 0 ? totalRevenue / sales.length : 0;
+
+              document.getElementById('totalInventory').textContent = totalInventory;
+              document.getElementById('totalRevenue').textContent = '$' + totalRevenue.toFixed(2);
+              document.getElementById('totalSold').textContent = totalSold;
+              document.getElementById('avgSale').textContent = '$' + avgSale.toFixed(2);
+
+              const categories = {};
+              products.forEach(p => {
+                      if (!categories[p.category]) {
+                                categories[p.category] = { inStock: 0, sold: 0, revenue: 0 };
+                      }
+                      categories[p.category].inStock += p.quantity;
+              });
+
+              sales.forEach(s => {
+                      if (categories[s.category]) {
+                                categories[s.category].sold += s.quantity;
+                                categories[s.category].revenue += s.total;
+                      }
+              });
+
+              const categoryStats = document.getElementById('categoryStats');
+              if (Object.keys(categories).length === 0) {
+                      categoryStats.innerHTML = '<tr><td colspan="4" class="empty-state">No products yet</td></tr>';
+              } else {
+                      categoryStats.innerHTML = Object.entries(categories).map(([cat, stats]) => `
+                              <tr>
+                                        <td><strong>${escapeHtml(cat)}</strong></td>
+                                                  <td>${stats.inStock}</td>
+                                                            <td>${stats.sold}</td>
+                                                                      <td>$${stats.revenue.toFixed(2)}</td>
+                                                                              </tr>
+                                                                                    `).join('');
+              }
+
+              const recentSales = document.getElementById('recentSales');
+              if (sales.length === 0) {
+                      recentSales.innerHTML = '<tr><td colspan="6" class="empty-state">No sales yet</td></tr>';
+              } else {
+                      recentSales.innerHTML = sales.slice(-10).reverse().map(s => `
+                              <tr>
+                                        <td><strong>${escapeHtml(s.productName)}</strong></td>
+                                                  <td>${escapeHtml(s.category)}</td>
+                                                            <td>${s.quantity}</td>
+                                                                      <td>$${s.price.toFixed(2)}</td>
+                                                                                <td>$${s.total.toFixed(2)}</td>
+                                                                                          <td>${s.date}</td>
+                                                                                                  </tr>
+                                                                                                        `).join('');
+              }
+        }
+
+        function exportToCSV() {
+              if (products.length === 0 && sales.length === 0) {
+                      showMessage('error', 'No data to export');
+                      return;
+              }
+
+              let csv = 'PRODUCTS\n';
+              csv += 'Name,Category,Quantity,Price\n';
+              products.forEach(p => {
+                      csv += `"${p.name}","${p.category}",${p.quantity},${p.price}\n`;
+              });
+
+              csv += '\n\nSALES\n';
+              csv += 'Product,Category,Quantity,Price,Total,Date\n';
+              sales.forEach(s => {
+                      csv += `"${s.productName}","${s.category}",${s.quantity},${s.price},${s.total},"${s.date}"\n`;
+              });
+
+              const blob = new Blob([csv], { type: 'text/csv' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `inventory-export-${new Date().toISOString().split('T')[0]}.csv`;
+              a.click();
+              showMessage('success', '✓ Data exported to CSV');
+        }
+
+        function clearAllData() {
+              if (confirm('Are you sure? This will delete ALL products and sales data. This cannot be undone!')) {
+                      if (confirm('This is your last chance to cancel. Really clear everything?')) {
+                                products = [];
+                                sales = [];
+                                localStorage.setItem('inventoryProducts', JSON.stringify(products));
+                                localStorage.setItem('inventorySales', JSON.stringify(sales));
+                                updateProductsList();
+                                updateSaleProductSelect();
+                                updateDashboard();
+                                showMessage('success', '✓ All data cleared');
+                      }
+              }
+        }
+
+        function escapeHtml(text) {
+              const map = {
+                      '&': '&amp;',
+                      '<': '&lt;',
+                      '>': '&gt;',
+                      '"': '&quot;',
+                      "'": '&#039;'
+              };
+              return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        updateProductsList();
+        updateSaleProductSelect();
+        updateDashboard();
+    </script>
+
+  </body>
+</html>html>
+    </script>
+                    </tr></th></th>
+                          </tr></option></option></label></label>
+                    </tr></th></th>
+                              </tr>
+                  </tr></th></th>
+                            </tr>
+                  </thead>
+          </table></p></h1>
+  </body>
+    </style></title>
+  </head>
