@@ -431,6 +431,21 @@
                   display: none;
           }
 
+          .row-actions {
+                  display: flex;
+                  gap: 0.5rem;
+          }
+
+          .editing {
+                  background: #fff8e6;
+                  border-left: 3px solid #ffc107;
+                  padding-left: 0.75rem;
+          }
+
+          tr.row-editing {
+                  background: #fff8e6;
+          }
+
           @media (max-width: 768px) {
                   .container {
                             padding: 1rem;
@@ -553,7 +568,7 @@
 
         <!-- Products Tab -->
         <div id="products" class="tab-content">
-              <div class="section-title">Add new product</div>
+              <div class="section-title" id="productFormTitle">Add new product</div>
 
               <div class="tcgplayer-search">
                       <h3 style="font-size: 16px; margin-bottom: 1rem;">🔍 Search TCGPlayer pricing</h3>
@@ -624,7 +639,8 @@
                           <input type="number" id="productPrice" placeholder="0.00" min="0" step="0.01">
                   </div>
             </div>
-            <button class="btn btn-primary" onclick="addProduct()">➕ Add product</button>
+            <button class="btn btn-primary" id="saveProductBtn" onclick="saveProduct()">➕ Add product</button>
+            <button class="btn field-hidden" id="cancelEditBtn" onclick="cancelEdit()" style="margin-left: 0.5rem;">Cancel</button>
         
             <div class="section-title">Your products</div>
             <div class="filters" id="productFilters">
@@ -681,6 +697,7 @@
         let products = JSON.parse(localStorage.getItem('inventoryProducts')) || [];
         let sales = JSON.parse(localStorage.getItem('inventorySales')) || [];
         let productFilter = 'all';
+        let editingProductId = null;
 
         // Card games that support foil finishes and foreign-language printings.
         // The first entry of each list is the default (plain English non-foil).
@@ -890,7 +907,70 @@
               }
         }
 
-        function addProduct() {
+        /**
+         * Select an option, adding it first if the stored value is no longer
+         * in the list (e.g. a finish that has since been renamed)
+         */
+        function setSelectValue(select, value) {
+              if (!value) return;
+              if (!Array.from(select.options).some(o => o.value === value)) {
+                      select.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`);
+              }
+              select.value = value;
+        }
+
+        function resetProductForm() {
+              editingProductId = null;
+              document.getElementById('productName').value = '';
+              document.getElementById('productQuantity').value = '';
+              document.getElementById('productPrice').value = '';
+              document.getElementById('productFormTitle').textContent = 'Add new product';
+              document.getElementById('productFormTitle').classList.remove('editing');
+              document.getElementById('saveProductBtn').textContent = '➕ Add product';
+              document.getElementById('cancelEditBtn').classList.add('field-hidden');
+        }
+
+        /**
+         * Load an existing product into the form so its tags can be corrected
+         */
+        function editProduct(id) {
+              const product = products.find(p => p.id === id);
+              if (!product) {
+                      showMessage('error', 'Product not found');
+                      return;
+              }
+
+              editingProductId = id;
+
+              document.getElementById('productName').value = product.name;
+              setSelectValue(document.getElementById('productCategory'), product.category);
+              document.getElementById('productQuantity').value = product.quantity;
+              document.getElementById('productPrice').value = product.price.toFixed(2);
+
+              document.getElementById('productGame').value = product.game || '';
+              onGameChange();
+              if (GAMES[product.game]) {
+                      setSelectValue(document.getElementById('productFinish'), product.finish);
+                      setSelectValue(document.getElementById('productLanguage'), product.language);
+              }
+
+              const title = document.getElementById('productFormTitle');
+              title.textContent = `Editing: ${product.name}`;
+              title.classList.add('editing');
+              document.getElementById('saveProductBtn').textContent = '💾 Save changes';
+              document.getElementById('cancelEditBtn').classList.remove('field-hidden');
+
+              updateProductsList();
+              title.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function cancelEdit() {
+              resetProductForm();
+              updateProductsList();
+              showMessage('info', 'Edit cancelled');
+        }
+
+        function saveProduct() {
               const name = document.getElementById('productName').value.trim();
               const category = document.getElementById('productCategory').value;
               const quantity = parseInt(document.getElementById('productQuantity').value) || 0;
@@ -909,6 +989,26 @@
                       return;
               }
 
+              if (editingProductId !== null) {
+                      const product = products.find(p => p.id === editingProductId);
+                      if (!product) {
+                                showMessage('error', 'Product no longer exists');
+                                resetProductForm();
+                                updateProductsList();
+                                return;
+                      }
+
+                      Object.assign(product, { name, category, game, finish, language, quantity, price });
+                      localStorage.setItem('inventoryProducts', JSON.stringify(products));
+
+                      resetProductForm();
+                      showMessage('success', '✓ Product updated');
+                      updateProductsList();
+                      updateSaleProductSelect();
+                      updateDashboard();
+                      return;
+              }
+
               const product = {
                       id: Date.now(),
                       name,
@@ -924,10 +1024,7 @@
               products.push(product);
               localStorage.setItem('inventoryProducts', JSON.stringify(products));
 
-              document.getElementById('productName').value = '';
-              document.getElementById('productQuantity').value = '';
-              document.getElementById('productPrice').value = '';
-
+              resetProductForm();
               showMessage('success', '✓ Product added successfully');
               updateProductsList();
               updateSaleProductSelect();
@@ -937,6 +1034,7 @@
               if (confirm('Are you sure? This will delete the product but keep sales history.')) {
                       products = products.filter(p => p.id !== id);
                       localStorage.setItem('inventoryProducts', JSON.stringify(products));
+                      if (editingProductId === id) resetProductForm();
                       updateProductsList();
                       updateSaleProductSelect();
                       showMessage('success', '✓ Product deleted');
@@ -1007,12 +1105,12 @@
               }
 
               tbody.innerHTML = visible.map(p => `
-                    <tr>
+                    <tr class="${p.id === editingProductId ? 'row-editing' : ''}">
                             <td><strong>${escapeHtml(p.name)}</strong>${itemTags(p)}</td>
                                     <td>${escapeHtml(p.category)}</td>
                                             <td>${p.quantity}</td>
                                                     <td>$${p.price.toFixed(2)}</td>
-                                                            <td><button class="btn btn-danger" onclick="deleteProduct(${p.id})">Delete</button></td>
+                                                            <td class="row-actions"><button class="btn" onclick="editProduct(${p.id})">Edit</button><button class="btn btn-danger" onclick="deleteProduct(${p.id})">Delete</button></td>
                                                                   </tr>
                                                                       `).join('');
         }
