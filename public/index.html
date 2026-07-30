@@ -359,6 +359,78 @@
                   border: 1px solid #ddd;
           }
 
+          .tag-row {
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: 0.35rem;
+                  margin-top: 0.4rem;
+          }
+
+          .tag {
+                  display: inline-block;
+                  padding: 0.15rem 0.5rem;
+                  border: 1px solid transparent;
+                  border-radius: 3px;
+                  font-size: 11px;
+                  font-weight: 700;
+                  letter-spacing: 0.5px;
+                  text-transform: uppercase;
+                  white-space: nowrap;
+          }
+
+          .tag-game {
+                  background: #eef2f7;
+                  border-color: #d6dee8;
+                  color: #46566b;
+          }
+
+          .tag-foil {
+                  background: linear-gradient(135deg, #fdf1c7 0%, #f6d9f0 45%, #cfe9f7 100%);
+                  border-color: #e2c86a;
+                  color: #6b4f00;
+          }
+
+          .tag-lang {
+                  background: #efe6fb;
+                  border-color: #d9c9f3;
+                  color: #4a2a86;
+          }
+
+          .filters {
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: 0.5rem;
+                  margin: 1rem 0;
+          }
+
+          .chip {
+                  padding: 0.4rem 0.9rem;
+                  border: 1px solid #ddd;
+                  border-radius: 999px;
+                  background: white;
+                  color: #555;
+                  font-size: 12px;
+                  font-weight: 600;
+                  letter-spacing: 0.5px;
+                  text-transform: uppercase;
+                  cursor: pointer;
+                  transition: all 0.2s;
+          }
+
+          .chip:hover {
+                  border-color: #bbb;
+          }
+
+          .chip.active {
+                  background: #007bff;
+                  border-color: #007bff;
+                  color: white;
+          }
+
+          .field-hidden {
+                  display: none;
+          }
+
           @media (max-width: 768px) {
                   .container {
                             padding: 1rem;
@@ -402,40 +474,40 @@
         <div class="header">
               <h1>📦 Collectibles Inventory Tracker</h1>
             <p>Track your card inventory with live TCGPlayer pricing</p>
-        </div>div>
+        </div>
     
-      <div class="success-message" id="successMessage"></div>div>
-      <div class="error-message" id="errorMessage"></div>div>
-      <div class="info-message" id="infoMessage"></div>div>
+      <div class="success-message" id="successMessage"></div>
+      <div class="error-message" id="errorMessage"></div>
+      <div class="info-message" id="infoMessage"></div>
     
       <div class="tabs">
-          <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>button>
-          <button class="tab-btn" onclick="switchTab('products')">Products</button>button>
-          <button class="tab-btn" onclick="switchTab('sales')">Record sale</button>button>
-      </div>div>
+          <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+          <button class="tab-btn" onclick="switchTab('products')">Products</button>
+          <button class="tab-btn" onclick="switchTab('sales')">Record sale</button>
+      </div>
     
       <!-- Dashboard Tab -->
       <div id="dashboard" class="tab-content active">
           <div class="metrics">
                 <div class="metric">
-                        <div class="metric-label">Total inventory</div>div>
-                        <div class="metric-value" id="totalInventory">0</div>div>
-                </div>div>
+                        <div class="metric-label">Total inventory</div>
+                        <div class="metric-value" id="totalInventory">0</div>
+                </div>
                 <div class="metric">
-                        <div class="metric-label">Total revenue</div>div>
-                        <div class="metric-value" id="totalRevenue">$0</div>div>
-                </div>div>
+                        <div class="metric-label">Total revenue</div>
+                        <div class="metric-value" id="totalRevenue">$0</div>
+                </div>
                 <div class="metric">
-                        <div class="metric-label">Items sold</div>div>
-                        <div class="metric-value" id="totalSold">0</div>div>
-                </div>div>
+                        <div class="metric-label">Items sold</div>
+                        <div class="metric-value" id="totalSold">0</div>
+                </div>
                 <div class="metric">
-                        <div class="metric-label">Avg sale value</div>div>
-                        <div class="metric-value" id="avgSale">$0</div>div>
-                </div>div>
-          </div>div>
+                        <div class="metric-label">Avg sale value</div>
+                        <div class="metric-value" id="avgSale">$0</div>
+                </div>
+          </div>
       
-          <div class="section-title">Inventory by category</div>div>
+          <div class="section-title">Inventory by category</div>
           <table>
                   <thead>
                             <tr>
@@ -447,12 +519,12 @@
                   </thead>
                 <tbody id="categoryStats">
                   <tr>
-                              <td colspan="4" class="empty-state">No products yet. Add some to get started!</td>td>
+                              <td colspan="4" class="empty-state">No products yet. Add some to get started!</td>
                   </tr>
-                </tbody>tbody>
+                </tbody>
           </table>
 
-            <div class="section-title">Recent sales</div>div>
+            <div class="section-title">Recent sales</div>
             <table>
                     <thead>
                               <tr>
@@ -466,22 +538,22 @@
                     </thead>
                   <tbody id="recentSales">
                     <tr>
-                                <td colspan="6" class="empty-state">No sales yet</td>td>
+                                <td colspan="6" class="empty-state">No sales yet</td>
                     </tr>
-                  </tbody>tbody>
+                  </tbody>
             </table>
 
             <div class="export-section">
                     <h3 style="margin-bottom: 1rem;">Data management</h3>
-                    <button class="btn btn-primary" onclick="exportToCSV()">📥 Export to CSV</button>button>
-                    <button class="btn" onclick="clearAllData()" style="margin-left: 0.5rem;">🗑️ Clear all data</button>button>
+                    <button class="btn btn-primary" onclick="exportToCSV()">📥 Export to CSV</button>
+                    <button class="btn" onclick="clearAllData()" style="margin-left: 0.5rem;">🗑️ Clear all data</button>
                     <p style="font-size: 12px; color: #666; margin-top: 0.5rem;">Export your sales and inventory data for backup or analysis</p>
-            </div>div>
-      </div>div>
+            </div>
+      </div>
 
         <!-- Products Tab -->
         <div id="products" class="tab-content">
-              <div class="section-title">Add new product</div>div>
+              <div class="section-title">Add new product</div>
 
               <div class="tcgplayer-search">
                       <h3 style="font-size: 16px; margin-bottom: 1rem;">🔍 Search TCGPlayer pricing</h3>
@@ -489,7 +561,7 @@
                                 <div class="form-group">
                                             <label>Product name</label>
                                           <input type="text" id="searchProductName" placeholder="e.g., Pokémon Booster Box">
-                                </div>div>
+                                </div>
                               <div class="form-group">
                                         <label>Category</label>
                                         <select id="searchCategory">
@@ -499,19 +571,19 @@
                                                     <option>Stickers</option>
                                                     <option>Playmats</option>
                                                     <option>Clothing</option>
-                                        </select>select>
-                              </div>div>
-                      </div>div>
-                    <button class="btn btn-secondary" onclick="searchTCGPlayer()">Search TCGPlayer</button>button>
-                    <div id="searchResults" class="search-results"></div>div>
-              </div>div>
+                                        </select>
+                              </div>
+                      </div>
+                    <button class="btn btn-secondary" onclick="searchTCGPlayer()">Search TCGPlayer</button>
+                    <div id="searchResults" class="search-results"></div>
+              </div>
         
             <h3 style="font-size: 16px; margin: 2rem 0 1rem 0;">Or add manually</h3>
             <div class="form-row">
                   <div class="form-group">
                           <label>Product name</label>
                           <input type="text" id="productName" placeholder="e.g., Pokémon Booster Box">
-                  </div>div>
+                  </div>
                   <div class="form-group">
                           <label>Category</label>
                           <select id="productCategory">
@@ -521,22 +593,47 @@
                                     <option>Stickers</option>
                                     <option>Playmats</option>
                                     <option>Clothing</option>
-                          </select>select>
-                  </div>div>
+                          </select>
+                  </div>
                   <div class="form-group">
                           <label>Initial quantity</label>
                           <input type="number" id="productQuantity" placeholder="0" min="0">
-                  </div>div>
-            </div>div>
+                  </div>
+            </div>
+            <div class="form-row">
+                  <div class="form-group">
+                          <label>Game</label>
+                          <select id="productGame" onchange="onGameChange()">
+                                    <option value="">-- Not a card --</option>
+                                    <option value="magic">Magic: The Gathering</option>
+                                    <option value="onepiece">One Piece</option>
+                          </select>
+                  </div>
+                  <div class="form-group field-hidden" id="finishField">
+                          <label>Finish</label>
+                          <select id="productFinish"></select>
+                  </div>
+                  <div class="form-group field-hidden" id="languageField">
+                          <label>Language</label>
+                          <select id="productLanguage"></select>
+                  </div>
+            </div>
             <div class="form-row">
                   <div class="form-group">
                           <label>Unit price ($)</label>
                           <input type="number" id="productPrice" placeholder="0.00" min="0" step="0.01">
-                  </div>div>
-            </div>div>
-            <button class="btn btn-primary" onclick="addProduct()">➕ Add product</button>button>
+                  </div>
+            </div>
+            <button class="btn btn-primary" onclick="addProduct()">➕ Add product</button>
         
-            <div class="section-title">Your products</div>div>
+            <div class="section-title">Your products</div>
+            <div class="filters" id="productFilters">
+                  <button class="chip active" data-filter="all" onclick="setProductFilter('all')">All</button>
+                  <button class="chip" data-filter="foil" onclick="setProductFilter('foil')">Foil</button>
+                  <button class="chip" data-filter="foreign" onclick="setProductFilter('foreign')">Foreign language</button>
+                  <button class="chip" data-filter="magic" onclick="setProductFilter('magic')">Magic</button>
+                  <button class="chip" data-filter="onepiece" onclick="setProductFilter('onepiece')">One Piece</button>
+            </div>
             <table>
                   <thead>
                           <tr>
@@ -549,40 +646,167 @@
                   </thead>
                   <tbody id="productsList">
                     <tr>
-                                <td colspan="5" class="empty-state">No products added yet</td>td>
+                                <td colspan="5" class="empty-state">No products added yet</td>
                     </tr>
-                  </tbody>tbody>
+                  </tbody>
             </table>
-        </div>div>
+        </div>
 
         <!-- Sales Tab -->
         <div id="sales" class="tab-content">
-              <div class="section-title">Record a sale</div>div>
+              <div class="section-title">Record a sale</div>
               <div class="form-row">
                       <div class="form-group">
                                 <label>Product</label>
                                 <select id="saleProduct">
                                             <option value="">-- Select a product --</option>
-                                </select>select>
-                      </div>div>
+                                </select>
+                      </div>
                       <div class="form-group">
                                 <label>Quantity sold</label>
                                 <input type="number" id="saleQuantity" placeholder="1" min="1" value="1">
-                      </div>div>
+                      </div>
                       <div class="form-group">
                                 <label>Price per unit ($)</label>
                                 <input type="number" id="salePrice" placeholder="0.00" min="0" step="0.01">
-                      </div>div>
-              </div>div>
-              <button class="btn btn-primary" onclick="recordSale()">💾 Record sale</button>button>
-        </div>div>
-    </div>div>
+                      </div>
+              </div>
+              <button class="btn btn-primary" onclick="recordSale()">💾 Record sale</button>
+        </div>
+    </div>
 
     <script>
         const API_BASE_URL = window.location.origin;
 
         let products = JSON.parse(localStorage.getItem('inventoryProducts')) || [];
         let sales = JSON.parse(localStorage.getItem('inventorySales')) || [];
+        let productFilter = 'all';
+
+        // Card games that support foil finishes and foreign-language printings.
+        // The first entry of each list is the default (plain English non-foil).
+        const GAMES = {
+              magic: {
+                      label: 'Magic',
+                      finishes: ['Non-foil', 'Foil', 'Etched foil', 'Textured foil', 'Surge foil', 'Galaxy foil'],
+                      languages: [
+                                { code: 'EN', name: 'English' },
+                                { code: 'JA', name: 'Japanese' },
+                                { code: 'KO', name: 'Korean' },
+                                { code: 'ZHS', name: 'Chinese Simplified' },
+                                { code: 'ZHT', name: 'Chinese Traditional' },
+                                { code: 'FR', name: 'French' },
+                                { code: 'DE', name: 'German' },
+                                { code: 'IT', name: 'Italian' },
+                                { code: 'ES', name: 'Spanish' },
+                                { code: 'PT', name: 'Portuguese' },
+                                { code: 'RU', name: 'Russian' },
+                                { code: 'PH', name: 'Phyrexian' }
+                      ]
+              },
+              onepiece: {
+                      label: 'One Piece',
+                      finishes: ['Non-foil', 'Foil', 'Parallel foil', 'Manga rare foil'],
+                      languages: [
+                                { code: 'EN', name: 'English' },
+                                { code: 'JA', name: 'Japanese' },
+                                { code: 'KO', name: 'Korean' },
+                                { code: 'ZHS', name: 'Chinese Simplified' },
+                                { code: 'ZHT', name: 'Chinese Traditional' },
+                                { code: 'TH', name: 'Thai' },
+                                { code: 'ID', name: 'Indonesian' },
+                                { code: 'VI', name: 'Vietnamese' }
+                      ]
+              }
+        };
+
+        function isFoil(finish) {
+              return !!finish && finish !== 'Non-foil';
+        }
+
+        function isForeignLanguage(language) {
+              return !!language && language !== 'English';
+        }
+
+        function languageCode(game, language) {
+              const match = GAMES[game]?.languages.find(l => l.name === language);
+              return match ? match.code : String(language || '').slice(0, 2).toUpperCase();
+        }
+
+        /**
+         * Foil / foreign-language / game badges shown under an item name
+         */
+        function itemTags(item) {
+              const tags = [];
+
+              if (GAMES[item.game]) {
+                      tags.push(`<span class="tag tag-game">${escapeHtml(GAMES[item.game].label)}</span>`);
+              }
+
+              if (isFoil(item.finish)) {
+                      tags.push(`<span class="tag tag-foil">${escapeHtml(item.finish)}</span>`);
+              }
+
+              if (isForeignLanguage(item.language)) {
+                      tags.push(`<span class="tag tag-lang">${escapeHtml(languageCode(item.game, item.language))} · ${escapeHtml(item.language)}</span>`);
+              }
+
+              return tags.length ? `<div class="tag-row">${tags.join('')}</div>` : '';
+        }
+
+        /**
+         * Plain-text version of the tags, for select options and CSV export
+         */
+        function itemTagText(item) {
+              const tags = [];
+              if (isFoil(item.finish)) tags.push(item.finish);
+              if (isForeignLanguage(item.language)) tags.push(item.language);
+              return tags.length ? ` [${tags.join(', ')}]` : '';
+        }
+
+        function matchesProductFilter(product) {
+              switch (productFilter) {
+                      case 'foil': return isFoil(product.finish);
+                      case 'foreign': return isForeignLanguage(product.language);
+                      case 'magic': return product.game === 'magic';
+                      case 'onepiece': return product.game === 'onepiece';
+                      default: return true;
+              }
+        }
+
+        function setProductFilter(filter) {
+              productFilter = filter;
+              document.querySelectorAll('#productFilters .chip').forEach(chip => {
+                      chip.classList.toggle('active', chip.dataset.filter === filter);
+              });
+              updateProductsList();
+        }
+
+        /**
+         * Show finish + language pickers only for games that have them
+         */
+        function onGameChange() {
+              const game = document.getElementById('productGame').value;
+              const finishField = document.getElementById('finishField');
+              const languageField = document.getElementById('languageField');
+              const finishSelect = document.getElementById('productFinish');
+              const languageSelect = document.getElementById('productLanguage');
+
+              if (!GAMES[game]) {
+                      finishField.classList.add('field-hidden');
+                      languageField.classList.add('field-hidden');
+                      finishSelect.innerHTML = '';
+                      languageSelect.innerHTML = '';
+                      return;
+              }
+
+              finishSelect.innerHTML = GAMES[game].finishes
+                      .map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('');
+              languageSelect.innerHTML = GAMES[game].languages
+                      .map(l => `<option value="${escapeHtml(l.name)}">${escapeHtml(l.name)} (${escapeHtml(l.code)})</option>`).join('');
+
+              finishField.classList.remove('field-hidden');
+              languageField.classList.remove('field-hidden');
+        }
 
         function showMessage(type, message) {
               const messageEl = document.getElementById(`${type}Message`);
@@ -671,6 +895,9 @@
               const category = document.getElementById('productCategory').value;
               const quantity = parseInt(document.getElementById('productQuantity').value) || 0;
               const price = parseFloat(document.getElementById('productPrice').value) || 0;
+              const game = document.getElementById('productGame').value;
+              const finish = GAMES[game] ? document.getElementById('productFinish').value : '';
+              const language = GAMES[game] ? document.getElementById('productLanguage').value : '';
 
               if (!name) {
                       showMessage('error', 'Please enter a product name');
@@ -686,6 +913,9 @@
                       id: Date.now(),
                       name,
                       category,
+                      game,
+                      finish,
+                      language,
                       quantity,
                       price,
                       createdAt: new Date().toLocaleDateString()
@@ -740,6 +970,9 @@
                       productId,
                       productName: product.name,
                       category: product.category,
+                      game: product.game || '',
+                      finish: product.finish || '',
+                      language: product.language || '',
                       quantity,
                       price,
                       total: quantity * price,
@@ -767,9 +1000,15 @@
                       return;
               }
 
-              tbody.innerHTML = products.map(p => `
+              const visible = products.filter(matchesProductFilter);
+              if (visible.length === 0) {
+                      tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No products match this filter</td></tr>';
+                      return;
+              }
+
+              tbody.innerHTML = visible.map(p => `
                     <tr>
-                            <td><strong>${escapeHtml(p.name)}</strong></td>
+                            <td><strong>${escapeHtml(p.name)}</strong>${itemTags(p)}</td>
                                     <td>${escapeHtml(p.category)}</td>
                                             <td>${p.quantity}</td>
                                                     <td>$${p.price.toFixed(2)}</td>
@@ -781,7 +1020,7 @@
         function updateSaleProductSelect() {
               const select = document.getElementById('saleProduct');
               select.innerHTML = '<option value="">-- Select a product --</option>';
-              select.innerHTML += products.map(p => `<option value="${p.id}">${escapeHtml(p.name)} (${p.quantity} in stock)</option>`).join('');
+              select.innerHTML += products.map(p => `<option value="${p.id}">${escapeHtml(p.name)}${escapeHtml(itemTagText(p))} (${p.quantity} in stock)</option>`).join('');
 
               select.addEventListener('change', function() {
                       const product = products.find(p => p.id === parseInt(this.value));
@@ -837,7 +1076,7 @@
               } else {
                       recentSales.innerHTML = sales.slice(-10).reverse().map(s => `
                               <tr>
-                                        <td><strong>${escapeHtml(s.productName)}</strong></td>
+                                        <td><strong>${escapeHtml(s.productName)}</strong>${itemTags(s)}</td>
                                                   <td>${escapeHtml(s.category)}</td>
                                                             <td>${s.quantity}</td>
                                                                       <td>$${s.price.toFixed(2)}</td>
@@ -855,15 +1094,17 @@
               }
 
               let csv = 'PRODUCTS\n';
-              csv += 'Name,Category,Quantity,Price\n';
+              csv += 'Name,Category,Game,Finish,Language,Foil,Quantity,Price\n';
               products.forEach(p => {
-                      csv += `"${p.name}","${p.category}",${p.quantity},${p.price}\n`;
+                      const game = GAMES[p.game] ? GAMES[p.game].label : '';
+                      csv += `"${p.name}","${p.category}","${game}","${p.finish || ''}","${p.language || ''}",${isFoil(p.finish) ? 'Yes' : 'No'},${p.quantity},${p.price}\n`;
               });
 
               csv += '\n\nSALES\n';
-              csv += 'Product,Category,Quantity,Price,Total,Date\n';
+              csv += 'Product,Category,Game,Finish,Language,Foil,Quantity,Price,Total,Date\n';
               sales.forEach(s => {
-                      csv += `"${s.productName}","${s.category}",${s.quantity},${s.price},${s.total},"${s.date}"\n`;
+                      const game = GAMES[s.game] ? GAMES[s.game].label : '';
+                      csv += `"${s.productName}","${s.category}","${game}","${s.finish || ''}","${s.language || ''}",${isFoil(s.finish) ? 'Yes' : 'No'},${s.quantity},${s.price},${s.total},"${s.date}"\n`;
               });
 
               const blob = new Blob([csv], { type: 'text/csv' });
@@ -907,16 +1148,4 @@
     </script>
 
   </body>
-</html>html>
-    </script>
-                    </tr></th></th>
-                          </tr></option></option></label></label>
-                    </tr></th></th>
-                              </tr>
-                  </tr></th></th>
-                            </tr>
-                  </thead>
-          </table></p></h1>
-  </body>
-    </style></title>
-  </head>
+</html>
