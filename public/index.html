@@ -396,6 +396,13 @@
                   color: #4a2a86;
           }
 
+          /* English printings get a quieter tag so foreign ones still stand out */
+          .tag-lang-en {
+                  background: #f4f5f7;
+                  border-color: #e0e3e8;
+                  color: #6a7280;
+          }
+
           .filters {
                   display: flex;
                   flex-wrap: wrap;
@@ -750,7 +757,16 @@
         }
 
         /**
-         * Foil / foreign-language / game badges shown under an item name
+         * Language recorded on an item, falling back to the game default (English)
+         * for records saved before the language picker existed.
+         */
+        function itemLanguage(item) {
+              if (!GAMES[item.game]) return '';
+              return item.language || GAMES[item.game].languages[0].name;
+        }
+
+        /**
+         * Foil / language / game badges shown under an item name
          */
         function itemTags(item) {
               const tags = [];
@@ -763,8 +779,10 @@
                       tags.push(`<span class="tag tag-foil">${escapeHtml(item.finish)}</span>`);
               }
 
-              if (isForeignLanguage(item.language)) {
-                      tags.push(`<span class="tag tag-lang">${escapeHtml(languageCode(item.game, item.language))} · ${escapeHtml(item.language)}</span>`);
+              const language = itemLanguage(item);
+              if (language) {
+                      const langClass = isForeignLanguage(language) ? 'tag-lang' : 'tag-lang-en';
+                      tags.push(`<span class="tag ${langClass}">${escapeHtml(languageCode(item.game, language))} · ${escapeHtml(language)}</span>`);
               }
 
               return tags.length ? `<div class="tag-row">${tags.join('')}</div>` : '';
