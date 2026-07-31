@@ -1,0 +1,4 @@
+node_modules/
+
+# Holds the TCGPlayer API keys — never commit
+.env
