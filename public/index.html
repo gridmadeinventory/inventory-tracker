@@ -336,6 +336,12 @@
                   color: #666;
           }
 
+          .price-note {
+                  font-size: 13px;
+                  color: #666;
+                  margin: -0.5rem 0 1rem 0;
+          }
+
           .loading {
                   display: inline-block;
                   width: 16px;
@@ -626,7 +632,7 @@
                   </div>
                   <div class="form-group field-hidden" id="finishField">
                           <label>Finish</label>
-                          <select id="productFinish"></select>
+                          <select id="productFinish" onchange="onFinishChange()"></select>
                   </div>
                   <div class="form-group field-hidden" id="languageField">
                           <label>Language</label>
@@ -638,7 +644,22 @@
                           <label>Unit price ($)</label>
                           <input type="number" id="productPrice" placeholder="0.00" min="0" step="0.01">
                   </div>
+                  <div class="form-group field-hidden" id="priceVariantField">
+                          <label>Printing</label>
+                          <select id="priceVariant" onchange="applyTcgPrice()"></select>
+                  </div>
+                  <div class="form-group field-hidden" id="priceTierField">
+                          <label>TCGPlayer price</label>
+                          <select id="priceTier" onchange="applyTcgPrice()">
+                                    <option value="market">Market (Near Mint)</option>
+                                    <option value="low">Lowest listing</option>
+                                    <option value="mid">Mid listing</option>
+                                    <option value="high">Highest listing</option>
+                                    <option value="directLow">TCGPlayer Direct low</option>
+                          </select>
+                  </div>
             </div>
+            <p class="price-note field-hidden" id="priceNote"></p>
             <button class="btn btn-primary" id="saveProductBtn" onclick="saveProduct()">➕ Add product</button>
             <button class="btn field-hidden" id="cancelEditBtn" onclick="cancelEdit()" style="margin-left: 0.5rem;">Cancel</button>
         
@@ -698,6 +719,19 @@
         let sales = JSON.parse(localStorage.getItem('inventorySales')) || [];
         let productFilter = 'all';
         let editingProductId = null;
+
+        // Pricing pulled from TCGPlayer for the product currently in the form.
+        // Held onto so switching printing or price tier re-fills the price box
+        // without another round trip.
+        let tcgPricing = null;
+
+        const TIER_LABELS = {
+              market: 'market price',
+              low: 'lowest listing',
+              mid: 'mid listing',
+              high: 'highest listing',
+              directLow: 'TCGPlayer Direct low'
+        };
 
         // Card games that support foil finishes and foreign-language printings.
         // The first entry of each list is the default (plain English non-foil).
@@ -813,6 +847,7 @@
                       languageField.classList.add('field-hidden');
                       finishSelect.innerHTML = '';
                       languageSelect.innerHTML = '';
+                      onFinishChange();
                       return;
               }
 
@@ -823,6 +858,8 @@
 
               finishField.classList.remove('field-hidden');
               languageField.classList.remove('field-hidden');
+
+              onFinishChange();
         }
 
         function showMessage(type, message) {
@@ -874,8 +911,11 @@
                                                                                                                                     </button>
                                                                                                                                               </div>
                                                                                                                                                       `).join('');
-                      } else {
+                      } else if (data.success) {
                                 resultsDiv.innerHTML = '<p style="text-align: center; color: #999;">No products found on TCGPlayer</p>';
+                      } else {
+                                showMessage('error', priceErrorText(data));
+                                resultsDiv.innerHTML = '';
                       }
               } catch (error) {
                       console.error('Search error:', error);
@@ -889,6 +929,7 @@
               document.getElementById('searchProductName').value = '';
               document.getElementById('searchResults').innerHTML = '';
 
+              clearTcgPricing();
               showMessage('info', `Selected: ${productName}. Now fetching live price...`);
 
               try {
@@ -896,15 +937,108 @@
                       const data = await response.json();
 
                       if (data.success) {
-                                document.getElementById('productPrice').value = data.price.toFixed(2);
-                                showMessage('success', `Price loaded: $${data.price.toFixed(2)}`);
+                                tcgPricing = { productId, variants: data.variants };
+                                showPriceControls();
+                                showMessage('success', `Loaded ${data.variants.length} printing(s) from TCGPlayer`);
                       } else {
-                                showMessage('info', 'Could not fetch price. You can enter it manually.');
+                                showMessage('error', priceErrorText(data));
                       }
               } catch (error) {
                       console.error('Price fetch error:', error);
-                      showMessage('info', 'Server unavailable. You can enter the price manually.');
+                      showMessage('error', 'Could not reach the server. Enter the price manually.');
               }
+        }
+
+        /**
+         * Say what actually went wrong rather than implying the product has no price
+         */
+        function priceErrorText(data) {
+              switch (data.code) {
+                      case 'missing_credentials':
+                              return 'Live pricing is not set up on the server (no TCGPlayer API keys). Enter the price manually.';
+                      case 'bad_credentials':
+                              return 'TCGPlayer rejected the server\'s API keys. Enter the price manually.';
+                      case 'no_pricing':
+                              return 'TCGPlayer has no pricing for this product. Enter the price manually.';
+                      default:
+                              return `Could not fetch price: ${data.error || 'unknown error'}. Enter it manually.`;
+              }
+        }
+
+        /**
+         * Fill the printing picker and reveal the price controls
+         */
+        function showPriceControls() {
+              const variantSelect = document.getElementById('priceVariant');
+              variantSelect.innerHTML = tcgPricing.variants
+                      .map(v => `<option value="${escapeHtml(v.subTypeName)}">${escapeHtml(v.subTypeName)}</option>`).join('');
+
+              variantSelect.value = defaultVariantFor(tcgPricing.variants).subTypeName;
+
+              document.getElementById('priceVariantField').classList.remove('field-hidden');
+              document.getElementById('priceTierField').classList.remove('field-hidden');
+
+              applyTcgPrice();
+        }
+
+        /**
+         * Pick the printing that matches the finish tagged on the form. TCGPlayer
+         * names its foil rows things like "Foil" and "Holofoil", so match on
+         * foil-ness rather than the exact label.
+         */
+        function defaultVariantFor(variants) {
+              const game = document.getElementById('productGame').value;
+              if (!GAMES[game]) return variants[0];
+
+              const wantFoil = isFoil(document.getElementById('productFinish').value);
+              return variants.find(v => /foil/i.test(v.subTypeName) === wantFoil) || variants[0];
+        }
+
+        /**
+         * Copy the selected printing + tier into the price box
+         */
+        function applyTcgPrice() {
+              if (!tcgPricing) return;
+
+              const note = document.getElementById('priceNote');
+              const variant = tcgPricing.variants
+                      .find(v => v.subTypeName === document.getElementById('priceVariant').value);
+              if (!variant) return;
+
+              const tier = document.getElementById('priceTier').value;
+              const value = variant.prices[tier];
+
+              note.classList.remove('field-hidden');
+
+              if (value === null || value === undefined) {
+                      note.textContent = `TCGPlayer has no ${TIER_LABELS[tier]} for the ${variant.subTypeName} printing — pick another price or type one in.`;
+                      return;
+              }
+
+              document.getElementById('productPrice').value = value.toFixed(2);
+              note.textContent = `${variant.subTypeName} · ${TIER_LABELS[tier]} · $${value.toFixed(2)}`
+                      + (tier === 'market' ? ' — TCGPlayer market price tracks Near Mint sales.' : '');
+        }
+
+        /**
+         * Drop cached pricing and hide the controls it drives
+         */
+        function clearTcgPricing() {
+              tcgPricing = null;
+              document.getElementById('priceVariant').innerHTML = '';
+              document.getElementById('priceVariantField').classList.add('field-hidden');
+              document.getElementById('priceTierField').classList.add('field-hidden');
+              document.getElementById('priceNote').classList.add('field-hidden');
+              document.getElementById('priceNote').textContent = '';
+        }
+
+        /**
+         * Re-point the price at the printing that matches the new finish
+         */
+        function onFinishChange() {
+              if (!tcgPricing) return;
+              document.getElementById('priceVariant').value = defaultVariantFor(tcgPricing.variants).subTypeName;
+              applyTcgPrice();
         }
 
         /**
@@ -921,6 +1055,7 @@
 
         function resetProductForm() {
               editingProductId = null;
+              clearTcgPricing();
               document.getElementById('productName').value = '';
               document.getElementById('productQuantity').value = '';
               document.getElementById('productPrice').value = '';
@@ -941,6 +1076,7 @@
               }
 
               editingProductId = id;
+              clearTcgPricing();
 
               document.getElementById('productName').value = product.name;
               setSelectValue(document.getElementById('productCategory'), product.category);
