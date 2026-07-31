@@ -625,11 +625,7 @@
             <div class="form-row">
                   <div class="form-group">
                           <label>Game</label>
-                          <select id="productGame" onchange="onGameChange()">
-                                    <option value="">-- Not a card --</option>
-                                    <option value="magic">Magic: The Gathering</option>
-                                    <option value="onepiece">One Piece</option>
-                          </select>
+                          <select id="productGame" onchange="onGameChange()"></select>
                   </div>
                   <div class="form-group field-hidden" id="finishField">
                           <label>Finish</label>
@@ -654,8 +650,6 @@
                   <button class="chip active" data-filter="all" onclick="setProductFilter('all')">All</button>
                   <button class="chip" data-filter="foil" onclick="setProductFilter('foil')">Foil</button>
                   <button class="chip" data-filter="foreign" onclick="setProductFilter('foreign')">Foreign language</button>
-                  <button class="chip" data-filter="magic" onclick="setProductFilter('magic')">Magic</button>
-                  <button class="chip" data-filter="onepiece" onclick="setProductFilter('onepiece')">One Piece</button>
             </div>
             <table>
                   <thead>
@@ -706,42 +700,79 @@
         let productFilter = 'all';
         let editingProductId = null;
 
+        // Language codes shared across games. Games list the codes they print in.
+        const LANGUAGES = {
+              EN: 'English',
+              AE: 'Asian-English',
+              JA: 'Japanese',
+              KO: 'Korean',
+              ZHS: 'Chinese Simplified',
+              ZHT: 'Chinese Traditional',
+              FR: 'French',
+              DE: 'German',
+              IT: 'Italian',
+              ES: 'Spanish',
+              PT: 'Portuguese',
+              RU: 'Russian',
+              TH: 'Thai',
+              ID: 'Indonesian',
+              VI: 'Vietnamese',
+              PH: 'Phyrexian'
+        };
+
         // Card games that support foil finishes and foreign-language printings.
         // The first entry of each list is the default (plain English non-foil).
         const GAMES = {
               magic: {
                       label: 'Magic',
                       finishes: ['Non-foil', 'Foil', 'Etched foil', 'Textured foil', 'Surge foil', 'Galaxy foil'],
-                      languages: [
-                                { code: 'EN', name: 'English' },
-                                { code: 'JA', name: 'Japanese' },
-                                { code: 'KO', name: 'Korean' },
-                                { code: 'ZHS', name: 'Chinese Simplified' },
-                                { code: 'ZHT', name: 'Chinese Traditional' },
-                                { code: 'FR', name: 'French' },
-                                { code: 'DE', name: 'German' },
-                                { code: 'IT', name: 'Italian' },
-                                { code: 'ES', name: 'Spanish' },
-                                { code: 'PT', name: 'Portuguese' },
-                                { code: 'RU', name: 'Russian' },
-                                { code: 'PH', name: 'Phyrexian' }
-                      ]
+                      languages: ['EN', 'JA', 'KO', 'ZHS', 'ZHT', 'FR', 'DE', 'IT', 'ES', 'PT', 'RU', 'PH']
+              },
+              pokemon: {
+                      label: 'Pokémon',
+                      finishes: ['Non-foil', 'Holofoil', 'Reverse holofoil', 'Cosmos holo', 'Poké Ball holo', 'Master Ball holo'],
+                      languages: ['EN', 'JA', 'KO', 'ZHS', 'ZHT', 'FR', 'DE', 'IT', 'ES', 'PT', 'RU', 'TH', 'ID']
+              },
+              yugioh: {
+                      label: 'Yu-Gi-Oh!',
+                      finishes: ['Non-foil', 'Super rare', 'Ultra rare', 'Secret rare', 'Ultimate rare', 'Ghost rare', 'Collector’s rare', 'Starlight rare'],
+                      languages: ['EN', 'AE', 'JA', 'KO', 'FR', 'DE', 'IT', 'ES', 'PT']
               },
               onepiece: {
                       label: 'One Piece',
                       finishes: ['Non-foil', 'Foil', 'Parallel foil', 'Manga rare foil'],
-                      languages: [
-                                { code: 'EN', name: 'English' },
-                                { code: 'JA', name: 'Japanese' },
-                                { code: 'KO', name: 'Korean' },
-                                { code: 'ZHS', name: 'Chinese Simplified' },
-                                { code: 'ZHT', name: 'Chinese Traditional' },
-                                { code: 'TH', name: 'Thai' },
-                                { code: 'ID', name: 'Indonesian' },
-                                { code: 'VI', name: 'Vietnamese' }
-                      ]
+                      languages: ['EN', 'JA', 'KO', 'ZHS', 'ZHT', 'TH', 'ID', 'VI']
+              },
+              lorcana: {
+                      label: 'Lorcana',
+                      finishes: ['Non-foil', 'Foil', 'Enchanted', 'Iconic'],
+                      languages: ['EN', 'JA', 'ZHS', 'FR', 'DE', 'IT', 'ES', 'PT']
+              },
+              digimon: {
+                      label: 'Digimon',
+                      finishes: ['Non-foil', 'Foil', 'Textured foil', 'Alternative art'],
+                      languages: ['EN', 'JA', 'KO', 'ZHS']
+              },
+              starwars: {
+                      label: 'Star Wars: Unlimited',
+                      finishes: ['Non-foil', 'Foil', 'Hyperspace', 'Hyperspace foil', 'Showcase'],
+                      languages: ['EN', 'JA', 'FR', 'DE', 'IT', 'ES']
               }
         };
+
+        /**
+         * The languages a game prints in, as { code, name } pairs
+         */
+        function gameLanguages(game) {
+              return (GAMES[game]?.languages || []).map(code => ({ code, name: LANGUAGES[code] }));
+        }
+
+        /**
+         * A game's default language (the first it lists)
+         */
+        function defaultLanguage(game) {
+              return LANGUAGES[GAMES[game]?.languages[0]] || '';
+        }
 
         function isFoil(finish) {
               return !!finish && finish !== 'Non-foil';
@@ -752,7 +783,7 @@
         }
 
         function languageCode(game, language) {
-              const match = GAMES[game]?.languages.find(l => l.name === language);
+              const match = gameLanguages(game).find(l => l.name === language);
               return match ? match.code : String(language || '').slice(0, 2).toUpperCase();
         }
 
@@ -762,7 +793,7 @@
          */
         function itemLanguage(item) {
               if (!GAMES[item.game]) return '';
-              return item.language || GAMES[item.game].languages[0].name;
+              return item.language || defaultLanguage(item.game);
         }
 
         /**
@@ -799,11 +830,11 @@
         }
 
         function matchesProductFilter(product) {
+              if (GAMES[productFilter]) return product.game === productFilter;
+
               switch (productFilter) {
                       case 'foil': return isFoil(product.finish);
                       case 'foreign': return isForeignLanguage(product.language);
-                      case 'magic': return product.game === 'magic';
-                      case 'onepiece': return product.game === 'onepiece';
                       default: return true;
               }
         }
@@ -836,7 +867,7 @@
 
               finishSelect.innerHTML = GAMES[game].finishes
                       .map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('');
-              languageSelect.innerHTML = GAMES[game].languages
+              languageSelect.innerHTML = gameLanguages(game)
                       .map(l => `<option value="${escapeHtml(l.name)}">${escapeHtml(l.name)} (${escapeHtml(l.code)})</option>`).join('');
 
               finishField.classList.remove('field-hidden');
@@ -1258,6 +1289,21 @@
               return text.replace(/[&<>"']/g, m => map[m]);
         }
 
+        /**
+         * Build the game picker and the per-game filter chips from GAMES, so
+         * adding a game in one place lights it up everywhere
+         */
+        function renderGameOptions() {
+              const gameSelect = document.getElementById('productGame');
+              gameSelect.innerHTML = '<option value="">-- Not a card --</option>' + Object.entries(GAMES)
+                      .map(([key, g]) => `<option value="${escapeHtml(key)}">${escapeHtml(g.label)}</option>`).join('');
+
+              const filters = document.getElementById('productFilters');
+              filters.insertAdjacentHTML('beforeend', Object.entries(GAMES)
+                      .map(([key, g]) => `<button class="chip" data-filter="${escapeHtml(key)}" onclick="setProductFilter('${escapeHtml(key)}')">${escapeHtml(g.label)}</button>`).join(''));
+        }
+
+        renderGameOptions();
         updateProductsList();
         updateSaleProductSelect();
         updateDashboard();
